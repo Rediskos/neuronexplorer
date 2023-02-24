@@ -1,12 +1,23 @@
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 eclipse.project.name = appName + '-core'
 
+repositories {
+  flatDir {
+    dirs("lib")
+  }
+  maven{
+    url 'https://repo1.maven.org/maven2'
+  }
+  mavenCentral()
+  google()
+}
+
 dependencies {
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
   api "com.github.tommyettinger:digital:$digitalVersion"
   api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
-  implementation 'org.jetbrains.kotlinx:kotlin-deeplearning-tensorflow:$deeplearningVersion'
-  implementation 'org.jetbrains.kotlinx:kotlin-deeplearning-onnx:$deeplearningVersion'
-  implementation 'org.jetbrains.kotlinx:kotlin-deeplearning-visualization:$deeplearningVersion'
+  implementation 'org.jetbrains.kotlinx:kotlin-deeplearning-api:0.4.0'
+  api "org.tensorflow:tensorflow-core-platform:0.4.2"
+  api "org.tensorflow:tensorflow-framework:0.4.2"
 }
