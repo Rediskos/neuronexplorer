@@ -27,6 +27,8 @@ allprojects {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
   }
+
+
   apply plugin: 'eclipse'
   apply plugin: 'idea'
 }
@@ -34,7 +36,8 @@ allprojects {
 configure(subprojects) {
   apply plugin: 'java-library'
   apply plugin: 'kotlin'
-  sourceCompatibility = 1.8
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
   compileJava {
     options.incremental = true
   }

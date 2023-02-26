@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.utils.CameraInputController
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Circle
+import ru.kcode.feature.nlayers.NLayerRenderController
 
 
 class App : ApplicationAdapter() {
@@ -25,6 +26,7 @@ class App : ApplicationAdapter() {
     var camController: CameraInputController? = null
     var modelBatch: ModelBatch? = null
     var model: Model? = null
+    var layerController: NLayerRenderController? = null
 
     override fun create() {
         modelInit()
@@ -52,16 +54,17 @@ class App : ApplicationAdapter() {
         camController = CameraInputController(cam);
         Gdx.input.inputProcessor = camController;
         val modelBuilder = ModelBuilder()
-        model = modelBuilder.createBox(
-            5f, 5f, 5f,
+        model = modelBuilder.createSphere(
+            5f, 5f, 5f, 5, 5,
             Material(ColorAttribute.createDiffuse(Color.GREEN)),
             (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal).toLong()
         )
-        instance = ModelInstance(model)
+        instance = ModelInstance(model, 0f, 0f, 0f)
     }
 
     private fun modelInit() {
         TestModel.modelInit()
+        layerController = NLayerRenderController(TestModel.model.layers)
     }
 
     override fun render() {
@@ -70,6 +73,11 @@ class App : ApplicationAdapter() {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT.or(GL20.GL_DEPTH_BUFFER_BIT))
         modelBatch?.begin(cam);
         modelBatch?.render(instance, environment);
+        layerController?.getLayerInstances()?.forEach {
+            it.forEach { modelInstance ->
+                modelBatch?.render(modelInstance, environment)
+            }
+        }
         modelBatch?.end();
 //        batch!!.begin()
 //        batch!!.draw(image, 140f, 210f)
