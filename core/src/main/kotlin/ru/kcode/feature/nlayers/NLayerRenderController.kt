@@ -18,7 +18,6 @@ class NLayerRenderController(private val modelLayers: List<Layer>) {
         modelLayers.forEach {
             analyzeLayer(it)?.let { dimLayer ->
                 layers.add(dimLayer)
-                nextLayerX += NEXT_LAYER_X_SHIFT
             }
         }
         layers
@@ -33,7 +32,18 @@ class NLayerRenderController(private val modelLayers: List<Layer>) {
     private fun analyzeLayer(layer: Layer): DimLayer? {
         val dims = layer.outputShape.dims()
         return when (dims.size) {
-            ONE_DIMENSIONS -> OneDimLayer(dims[1], x = nextLayerX, y = nextLayerY, z = nextLayerZ)
+            ONE_DIMENSIONS -> {
+                OneDimLayer(dims[1], startX = nextLayerX, startY = nextLayerY, startZ = nextLayerZ).also {
+                 nextLayerX += NEXT_LAYER_X_SHIFT
+                }
+            }
+            THREE_DIMENSIONS -> {
+                ThreeDimLayer(dims[1], dims[2], dims[3], nextLayerX, nextLayerY, nextLayerZ).also {
+                    nextLayerX += NEXT_LAYER_X_SHIFT * dims[3]
+                    nextLayerZ = dims[1].toFloat() * NSphere.DEFAULT_WIDTH
+                    nextLayerY = dims[2].toFloat() * NSphere.DEFAULT_HEIGHT / 2
+                }
+            }
             else -> null
         }
     }
