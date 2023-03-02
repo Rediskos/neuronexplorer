@@ -20,12 +20,16 @@ data class NSphere(
     val material: Material = DEFAULT_MATERIAL,
     val attributes: Long = DEFAULT_ATTRIBUTES,
 ) {
-    private fun toModel(): Model {
-        return ModelBuilder().createSphere(width, height, depth, divisionsU, divisionsV, material, attributes)
+    private val model: Model by lazy {
+        ModelBuilder().createSphere(width, height, depth, divisionsU, divisionsV, material, attributes)
     }
 
     fun toModelInstance(): ModelInstance {
-        return ModelInstance(toModel(), x, y, z)
+        return ModelInstance(model, x, y, z)
+    }
+
+    fun dispose() {
+        model.dispose()
     }
     companion object {
         const val DEFAULT_WIDTH = 5f

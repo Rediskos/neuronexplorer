@@ -3,23 +3,19 @@ package ru.kcode
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.*
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g3d.*
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.Circle
+import kotlinx.coroutines.*
 import ru.kcode.feature.nlayers.NLayerRenderController
 
 
 class App : ApplicationAdapter() {
-    private var batch: SpriteBatch? = null
-    private var image: Texture? = null
-    private var circle: Circle? = null
+
     private var shape: ShapeRenderer? = null
-    private var balls: List<Ball>? = null
     private var cam: PerspectiveCamera? = null
     private var instance: ModelInstance? = null
     var environment: Environment? = null
@@ -30,11 +26,6 @@ class App : ApplicationAdapter() {
 
     override fun create() {
         modelInit()
-        batch = SpriteBatch()
-        image = Texture("libgdx.png")
-        circle = Circle(200.0F, 200.0F, 40.0F)
-        balls = Ball.getRandomBalls(50)
-        shape = ShapeRenderer()
         modelBatch = ModelBatch()
         environment = Environment()
         environment!!.set(ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f))
@@ -67,36 +58,29 @@ class App : ApplicationAdapter() {
         layerController = NLayerRenderController(TestModel.model.layers)
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun render() {
-        camController?.update()
-        Gdx.gl.glViewport(0, 0, Gdx.graphics.width, Gdx.graphics.height)
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT.or(GL20.GL_DEPTH_BUFFER_BIT))
-        modelBatch?.begin(cam);
-        modelBatch?.render(instance, environment);
-        layerController?.getLayerInstances()?.forEach {
-            it.forEach { modelInstance ->
-                modelBatch?.render(modelInstance, environment)
+        runBlocking {
+            camController?.update()
+            Gdx.gl.glViewport(0, 0, Gdx.graphics.width, Gdx.graphics.height)
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT.or(GL20.GL_DEPTH_BUFFER_BIT))
+            modelBatch?.begin(cam);
+            modelBatch?.render(instance, environment);
+
+            layerController?.let {
+                it.getLayersInstances().forEach { modelInstance ->
+                    modelBatch?.render(modelInstance, environment)
+                }
+
             }
+            modelBatch?.end();
         }
-        modelBatch?.end();
-//        batch!!.begin()
-//        batch!!.draw(image, 140f, 210f)
-//        batch!!.end()
-//        shape?.apply {
-//            begin(ShapeRenderer.ShapeType.Filled)
-//            balls?.forEach {
-//                it.update()
-//                it.draw(this)
-//            }
-//            end()
-//        }
     }
 
     override fun dispose() {
-        batch!!.dispose()
-        image!!.dispose()
-        shape!!.dispose()
-        model!!.dispose()
-        modelBatch!!.dispose()
+        shape?.dispose()
+        model?.dispose()
+        layerController?.dispose()
+        modelBatch?.dispose()
     }
 }
