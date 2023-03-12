@@ -2,15 +2,20 @@ package ru.kcode
 
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.*
-import com.badlogic.gdx.graphics.g3d.*
+import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.PerspectiveCamera
+import com.badlogic.gdx.graphics.g3d.Environment
+import com.badlogic.gdx.graphics.g3d.Model
+import com.badlogic.gdx.graphics.g3d.ModelBatch
+import com.badlogic.gdx.graphics.g3d.ModelInstance
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import kotlinx.coroutines.*
+import com.badlogic.gdx.math.Vector3
+import kotlinx.coroutines.runBlocking
 import ru.kcode.feature.nlayers.NLayerRenderController
+import ru.kcode.utils.NetworkModelInstance
 
 
 class App : ApplicationAdapter() {
@@ -36,21 +41,14 @@ class App : ApplicationAdapter() {
             Gdx.graphics.width.toFloat(),
             Gdx.graphics.height.toFloat()
         ).apply {
-            position.set(10f, 10f, 10f)
+            position.set(10f, 10f, 100f)
             lookAt(0f, 0f, 0f)
             near = 1f
             far = 300f
             update()
         }
-        camController = CameraInputController(cam);
+        camController = CameraInputController(cam).apply { translateUnits = 100f };
         Gdx.input.inputProcessor = camController;
-        val modelBuilder = ModelBuilder()
-        model = modelBuilder.createSphere(
-            5f, 5f, 5f, 5, 5,
-            Material(ColorAttribute.createDiffuse(Color.GREEN)),
-            (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal).toLong()
-        )
-        instance = ModelInstance(model, 0f, 0f, 0f)
     }
 
     private fun modelInit() {
@@ -58,18 +56,26 @@ class App : ApplicationAdapter() {
         layerController = NLayerRenderController(TestModel.model.layers)
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun render() {
         runBlocking {
             camController?.update()
             Gdx.gl.glViewport(0, 0, Gdx.graphics.width, Gdx.graphics.height)
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT.or(GL20.GL_DEPTH_BUFFER_BIT))
             modelBatch?.begin(cam);
-            modelBatch?.render(instance, environment);
-
             layerController?.let {
-                it.getLayersInstances().forEach { modelInstance ->
-                    modelBatch?.render(modelInstance, environment)
+                it.getLayersInstances().forEach { modelInstances ->
+                    modelInstances.forEach { modelInstance ->
+                        if (isVisible(cam, modelInstance)){
+                            modelBatch?.render(modelInstance, environment)
+                        }
+                    }
+                }
+                it.getConnectionsInstances().forEach { modelInstances ->
+                    modelInstances.forEach { modelInstance ->
+                        if (isVisible(cam, modelInstance)){
+                            modelBatch?.render(modelInstance, environment)
+                        }
+                    }
                 }
 
             }
@@ -77,6 +83,12 @@ class App : ApplicationAdapter() {
         }
     }
 
+    private val position = Vector3()
+    private fun isVisible(camera: PerspectiveCamera?, instance: NetworkModelInstance): Boolean {
+        instance.transform.getTranslation(position);
+        position.add(instance.center)
+        return cam?.frustum?.pointInFrustum(position) ?: false;
+    }
     override fun dispose() {
         shape?.dispose()
         model?.dispose()

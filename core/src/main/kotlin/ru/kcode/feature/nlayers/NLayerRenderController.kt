@@ -1,14 +1,15 @@
 package ru.kcode.feature.nlayers
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance
 import org.jetbrains.kotlinx.dl.api.core.layer.Layer
+import ru.kcode.feature.nlayers.connections.DenseConnection
 import ru.kcode.feature.nlayers.dimentions.OneDimLayer
 import ru.kcode.feature.nlayers.dimentions.ThreeDimLayer
 import ru.kcode.feature.nlayers.models.NSphere
+import ru.kcode.utils.NetworkModelInstance
 
 private const val ONE_DIMENSIONS = 2
 private const val THREE_DIMENSIONS = 4
-private const val NEXT_LAYER_X_SHIFT = NSphere.DEFAULT_WIDTH * 10
+private const val NEXT_LAYER_X_SHIFT = NSphere.DEFAULT_WIDTH * 30
 
 class NLayerRenderController(private val modelLayers: List<Layer>) {
     private var nextLayerCenterX = 0f
@@ -29,12 +30,28 @@ class NLayerRenderController(private val modelLayers: List<Layer>) {
         layers
     }
 
-    private val layerInstances: List<List<ModelInstance>> by lazy {
+    private val connectios: List<DimConnection> by lazy {
+        val connections = arrayListOf<DimConnection>()
+        for (layerInd in 0 until (layers.size - 1)) {
+            val connection = DenseConnection(layers[layerInd], layers[layerInd + 1])
+            connections.add(connection)
+        }
+        connections
+    }
+
+    private val layerInstances: List<List<NetworkModelInstance>> by lazy {
         layers.map {
             it.getModelInstances()
         }
     }
-    fun getLayersInstances(): List<List<ModelInstance>> = layerInstances
+
+    private val connectionInstances: List<List<NetworkModelInstance>> by lazy {
+        connectios.map {
+            it.getModelInstances()
+        }
+    }
+    fun getLayersInstances(): List<List<NetworkModelInstance>> = layerInstances
+    fun getConnectionsInstances(): List<List<NetworkModelInstance>> = connectionInstances
 
     private fun analyzeLayer(layer: Layer): DimLayer? {
         val dims = layer.outputShape.dims()

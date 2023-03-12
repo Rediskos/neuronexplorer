@@ -22,10 +22,10 @@ object TestModel {
     )
 
     val model = Sequential.of(
-        Input(28,28,1),
+        Input(50),
         Flatten(),
-        Dense(300),
-        Dense(100),
+        Dense(70),
+        Dense(50),
         Dense(10)
     )
 

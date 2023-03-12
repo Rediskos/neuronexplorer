@@ -1,8 +1,8 @@
 package ru.kcode.feature.nlayers.dimentions
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance
 import ru.kcode.feature.nlayers.DimLayer
 import ru.kcode.feature.nlayers.models.NSphere
+import ru.kcode.utils.NetworkModelInstance
 
 class OneDimLayer(
     private val count: Long,
@@ -31,7 +31,7 @@ class OneDimLayer(
         models
     }
 
-    override fun getModelInstances(): List<ModelInstance> = models.map {
+    override fun getModelInstances(): List<NetworkModelInstance> = models.map {
         it.toModelInstance()
     }
 

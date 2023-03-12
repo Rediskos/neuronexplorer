@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.Model
 import com.badlogic.gdx.graphics.g3d.ModelInstance
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
+import ru.kcode.utils.NetworkModelInstance
 
 data class NSphere(
     var x: Float = 0f,
@@ -24,8 +25,8 @@ data class NSphere(
         ModelBuilder().createSphere(width, height, depth, divisionsU, divisionsV, material, attributes)
     }
 
-    fun toModelInstance(): ModelInstance {
-        return ModelInstance(model, x, y, z)
+    fun toModelInstance(): NetworkModelInstance {
+        return NetworkModelInstance(model, x, y, z)
     }
 
     fun dispose() {
