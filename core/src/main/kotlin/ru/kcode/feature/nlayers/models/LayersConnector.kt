@@ -12,12 +12,12 @@ import ru.kcode.utils.NetworkModelInstance
 
 
 class LayersConnector(
-    private val startX: Float,
-    private val startY: Float,
-    private val startZ: Float,
-    private val endX: Float,
-    private val endY: Float,
-    private val endZ: Float,
+    val startX: Float,
+    val startY: Float,
+    val startZ: Float,
+    val endX: Float,
+    val endY: Float,
+    val endZ: Float,
     private val capLength: Float = DEFAULT_CAP_LENGTH,
     private val stemThickness: Float = DEFAULT_STEM_THICKNESS,
     private val divisions: Int = DEFAULT_DIVISIONS,
@@ -52,10 +52,11 @@ class LayersConnector(
     }
 
     companion object {
-        const val DEFAULT_CAP_LENGTH = 0.01f
+        const val DEFAULT_CAP_LENGTH = 0f
         const val DEFAULT_STEM_THICKNESS = 0.01f
         const val DEFAULT_DIVISIONS = 2
-        val DEFAULT_MATERIAL = Material(ColorAttribute.createDiffuse(Color.GREEN))
+        val DEFAULT_COLOR: Color = Color.GREEN
+        val DEFAULT_MATERIAL = Material(ColorAttribute.createDiffuse(DEFAULT_COLOR))
         const val DEFAULT_ATTRIBUTES = (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal).toLong()
     }
 }

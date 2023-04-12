@@ -33,9 +33,9 @@ data class NSphere(
         model.dispose()
     }
     companion object {
-        const val DEFAULT_WIDTH = 5f
-        const val DEFAULT_HEIGHT = 5f
-        const val DEFAULT_DEPTH = 5f
+        const val DEFAULT_WIDTH = 1f
+        const val DEFAULT_HEIGHT = 1f
+        const val DEFAULT_DEPTH = 1f
         const val DEFAULT_DIVISION_U = 5
         const val DEFAULT_DIVISION_V = 5
         val DEFAULT_MATERIAL = Material(ColorAttribute.createDiffuse(Color.GREEN))

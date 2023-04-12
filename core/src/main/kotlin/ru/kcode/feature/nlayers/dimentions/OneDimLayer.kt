@@ -3,29 +3,40 @@ package ru.kcode.feature.nlayers.dimentions
 import ru.kcode.feature.nlayers.DimLayer
 import ru.kcode.feature.nlayers.models.NSphere
 import ru.kcode.utils.NetworkModelInstance
+import kotlin.math.max
 
 class OneDimLayer(
     private val count: Long,
+    private val prevHeight: Float?,
     private var centerX: Float,
     private var centerY: Float,
-    private val centerZ: Float
+    private val centerZ: Float,
 ) : DimLayer() {
 
     private var width: Float = 0.0f
     private var height: Float = 0.0f
     private var depth: Float = 0.0f
+    private var heightCoeff: Float = DEFAULT_HEIGHT_COEFFICIENT
+
+    init {
+        prevHeight?.let {
+            val defaultHeight = NSphere.DEFAULT_HEIGHT * (heightCoeff * count - 1)
+            heightCoeff = max(heightCoeff, prevHeight/defaultHeight)
+        }
+
+        width = NSphere.DEFAULT_WIDTH
+        height = NSphere.DEFAULT_HEIGHT * (heightCoeff * (count - 1))
+        depth = NSphere.DEFAULT_WIDTH
+    }
 
     override val models: List<NSphere> by lazy {
         val models = ArrayList<NSphere>()
-        width = NSphere.DEFAULT_WIDTH
-        height = NSphere.DEFAULT_HEIGHT * 2 * count - NSphere.DEFAULT_HEIGHT
-        depth = NSphere.DEFAULT_WIDTH
         val x = centerX
         var y = centerY - height / 2
         val z = centerZ
         for (i in 1..count) {
             val sphere = NSphere(x = x, y = y, z = z)
-            y += NSphere.DEFAULT_HEIGHT * 2
+            y += NSphere.DEFAULT_HEIGHT * heightCoeff
             models.add(sphere)
         }
         models
@@ -38,4 +49,8 @@ class OneDimLayer(
     override fun getWidth(): Float = width
     override fun getHeight(): Float = height
     override fun getDepth(): Float = depth
+
+    companion object {
+        private const val DEFAULT_HEIGHT_COEFFICIENT = 2f
+    }
 }

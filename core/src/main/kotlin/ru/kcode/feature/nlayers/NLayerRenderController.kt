@@ -1,33 +1,34 @@
 package ru.kcode.feature.nlayers
 
-import org.jetbrains.kotlinx.dl.api.core.layer.Layer
+import org.deeplearning4j.nn.api.Layer
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork
 import ru.kcode.feature.nlayers.connections.DenseConnection
 import ru.kcode.feature.nlayers.dimentions.OneDimLayer
-import ru.kcode.feature.nlayers.dimentions.ThreeDimLayer
+import ru.kcode.feature.nlayers.models.LayersConnector
 import ru.kcode.feature.nlayers.models.NSphere
 import ru.kcode.utils.NetworkModelInstance
 
 private const val ONE_DIMENSIONS = 2
 private const val THREE_DIMENSIONS = 4
-private const val NEXT_LAYER_X_SHIFT = NSphere.DEFAULT_WIDTH * 30
+private const val NEXT_LAYER_X_SHIFT = NSphere.DEFAULT_WIDTH * 100
 
-class NLayerRenderController(private val modelLayers: List<Layer>) {
+class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
     private var nextLayerCenterX = 0f
     private var nextLayerCenterY = 0f
     private var nextLayerCenterZ = 0f
 
+    private val tmpLayers: ArrayList<DimLayer> = arrayListOf()
     private val layers: List<DimLayer> by lazy {
-        val layers = ArrayList<DimLayer>()
-        modelLayers.forEach {
+        modelLayers.layers.forEach {
             analyzeLayer(it)?.let { dimLayer ->
-                layers.add(dimLayer)
+                tmpLayers.add(dimLayer)
             }
         }
-        nextLayerCenterY = layers.maxOfOrNull { it.getHeight() } ?: 0f
+        nextLayerCenterY = tmpLayers.maxOfOrNull { it.getHeight() } ?: 0f
         nextLayerCenterY /= 2
-        nextLayerCenterZ = layers.maxOfOrNull { it.getWidth() } ?: 0f
+        nextLayerCenterZ = tmpLayers.maxOfOrNull { it.getWidth() } ?: 0f
         nextLayerCenterZ /= 2
-        layers
+        tmpLayers
     }
 
     private val connectios: List<DimConnection> by lazy {
@@ -53,17 +54,25 @@ class NLayerRenderController(private val modelLayers: List<Layer>) {
     fun getLayersInstances(): List<List<NetworkModelInstance>> = layerInstances
     fun getConnectionsInstances(): List<List<NetworkModelInstance>> = connectionInstances
 
+    fun getConnections(): List<List<LayersConnector>> = connectios.map { it.models }
+    fun getOneConnection(idx: Int): LayersConnector = connectios.map { it.models }.flatten()[idx]
     private fun analyzeLayer(layer: Layer): DimLayer? {
-        val dims = layer.outputShape.dims()
-        return when (dims.size) {
-            ONE_DIMENSIONS -> {
-                OneDimLayer(dims[1], centerX = nextLayerCenterX, centerY = nextLayerCenterY, centerZ = nextLayerCenterZ).also {
-                 nextLayerCenterX += NEXT_LAYER_X_SHIFT
+
+        return when (layer.javaClass.simpleName) {
+            "DenseLayer" -> {
+                print("kekw")
+                val dims = layer.getParam("W").shape().last()
+                val prevHeight = tmpLayers.lastOrNull()?.getHeight()
+                OneDimLayer(dims, prevHeight, centerX = nextLayerCenterX, centerY = nextLayerCenterY, centerZ = nextLayerCenterZ).also {
+                    nextLayerCenterX += NEXT_LAYER_X_SHIFT
                 }
             }
-            THREE_DIMENSIONS -> {
-                ThreeDimLayer(dims[1], dims[2], dims[3], nextLayerCenterX, nextLayerCenterY, nextLayerCenterZ).also {
-                    nextLayerCenterX += NEXT_LAYER_X_SHIFT * dims[3]
+            "OutputLayer" -> {
+                print("lelw")
+                val dims = layer.getParam("W").shape().last()
+                val prevHeight = tmpLayers.lastOrNull()?.getHeight()
+                OneDimLayer(dims, prevHeight, centerX = nextLayerCenterX, centerY = nextLayerCenterY, centerZ = nextLayerCenterZ).also {
+                    nextLayerCenterX += NEXT_LAYER_X_SHIFT
                 }
             }
             else -> null
