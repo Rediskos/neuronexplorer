@@ -75,12 +75,12 @@ object MLPMnistSingleLayerExample {
                 .list()
                 .layer(DenseLayer.Builder() //create the first, input layer with xavier initialization
                         .nIn(numRows * numColumns)
-                        .nOut(1000)
+                        .nOut(100)
                         .activation(Activation.RELU)
                         .weightInit(WeightInit.XAVIER)
                         .build())
                 .layer(OutputLayer.Builder(LossFunction.NEGATIVELOGLIKELIHOOD) //create hidden layer
-                        .nIn(1000)
+                        .nIn(100)
                         .nOut(outputNum)
                         .activation(Activation.SOFTMAX)
                         .weightInit(WeightInit.XAVIER)

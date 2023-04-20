@@ -1,13 +1,13 @@
 package ru.kcode.feature.nlayers
 
+import org.deeplearning4j.nn.api.Layer
 import ru.kcode.feature.nlayers.models.NSphere
 import ru.kcode.utils.NetworkModelInstance
 
 
-abstract class DimLayer(val size: Int) {
+abstract class DimLayer(val size: Int = DEFAULT_NODE_SIZE, val detailLayer: Layer) {
 
     abstract val models: List<NSphere>
-    constructor(): this(DEFAULT_NODE_SIZE)
 
     abstract fun getModelInstances(): List<NetworkModelInstance>
     abstract fun getWidth(): Float

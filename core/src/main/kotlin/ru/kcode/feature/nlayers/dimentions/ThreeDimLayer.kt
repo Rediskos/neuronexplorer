@@ -1,5 +1,6 @@
 package ru.kcode.feature.nlayers.dimentions
 
+import org.deeplearning4j.nn.api.Layer
 import ru.kcode.feature.nlayers.DimLayer
 import ru.kcode.feature.nlayers.models.NSphere
 import ru.kcode.utils.NetworkModelInstance
@@ -8,10 +9,11 @@ class ThreeDimLayer(
     private val rows: Long,
     private val columns: Long,
     private val layersCount: Long,
+    detailLayer: Layer,
     private val centerX: Float,
     private val centerY: Float,
     private val centerZ: Float
-) : DimLayer() {
+) : DimLayer(detailLayer = detailLayer) {
 
     private var width: Float = 0.0f
     private var height: Float = 0.0f

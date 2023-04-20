@@ -1,14 +1,19 @@
 package ru.kcode.feature.nlayers.models
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.VertexAttributes
 import com.badlogic.gdx.graphics.g3d.Material
 import com.badlogic.gdx.graphics.g3d.Model
-import com.badlogic.gdx.graphics.g3d.ModelInstance
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Vector3
+import ru.kcode.feature.nlayers.animations.MovingAnimation
 import ru.kcode.utils.NetworkModelInstance
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction
+import kotlin.math.absoluteValue
 
 
 class LayersConnector(
@@ -18,6 +23,7 @@ class LayersConnector(
     val endX: Float,
     val endY: Float,
     val endZ: Float,
+    val weight: Double,
     private val capLength: Float = DEFAULT_CAP_LENGTH,
     private val stemThickness: Float = DEFAULT_STEM_THICKNESS,
     private val divisions: Int = DEFAULT_DIVISIONS,
@@ -26,6 +32,12 @@ class LayersConnector(
     private val attributes: Long = DEFAULT_ATTRIBUTES
 
 ) {
+    private val mover = NSphere(startX, startY, startZ)
+    private val moverAnimation = MovingAnimation(
+        mover.toModelInstance(),
+        Vector3(startX, startY, startZ),
+        Vector3(endX, endY, endZ)
+    )
     private val model: Model by lazy {
         ModelBuilder().createArrow(
             /* x1 = */ startX,
@@ -43,10 +55,25 @@ class LayersConnector(
         )
     }
 
+    fun animate(delta: Float): Boolean {
+        return moverAnimation.step(delta)
+    }
     fun toModelInstance(): NetworkModelInstance {
         return NetworkModelInstance(model)
     }
 
+    fun draw(shapeRenderer: ShapeRenderer) {
+        shapeRenderer.color = DEFAULT_COLOR;
+        Gdx.gl.glLineWidth(weight.toFloat().absoluteValue * 100)
+        shapeRenderer.line(
+            startX,
+            startY,
+            startZ,
+            endX,
+            endY,
+            endZ,
+        )
+    }
     fun dispose() {
         model.dispose()
     }

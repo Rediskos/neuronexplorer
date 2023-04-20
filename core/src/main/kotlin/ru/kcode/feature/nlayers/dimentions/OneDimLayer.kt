@@ -1,5 +1,6 @@
 package ru.kcode.feature.nlayers.dimentions
 
+import org.deeplearning4j.nn.api.Layer
 import ru.kcode.feature.nlayers.DimLayer
 import ru.kcode.feature.nlayers.models.NSphere
 import ru.kcode.utils.NetworkModelInstance
@@ -8,10 +9,11 @@ import kotlin.math.max
 class OneDimLayer(
     private val count: Long,
     private val prevHeight: Float?,
+    detailLayer: Layer,
     private var centerX: Float,
     private var centerY: Float,
     private val centerZ: Float,
-) : DimLayer() {
+) : DimLayer(detailLayer = detailLayer) {
 
     private var width: Float = 0.0f
     private var height: Float = 0.0f

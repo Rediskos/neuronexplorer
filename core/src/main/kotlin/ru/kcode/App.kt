@@ -17,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import ru.kcode.feature.nlayers.NLayerRenderController
 import ru.kcode.feature.nlayers.models.LayersConnector
 import ru.kcode.utils.NetworkModelInstance
+import kotlin.math.absoluteValue
 
 
 class App : ApplicationAdapter() {
@@ -68,36 +69,8 @@ class App : ApplicationAdapter() {
 
             shape?.projectionMatrix = cam?.combined
             shape?.begin(ShapeRenderer.ShapeType.Line);
-            shape?.color = LayersConnector.DEFAULT_COLOR;
 
 
-            try {
-
-                it.getOneConnection(tcount).apply {
-                    shape?.line(
-                        startX,
-                        startY,
-                        startZ,
-                        endX,
-                        endY,
-                        endZ
-                    )
-                }
-                tcount += 1
-            } catch (e: Exception) {
-                tcount = 0
-                it.getOneConnection(tcount).apply {
-                    shape?.line(
-                        startX,
-                        startY,
-                        startZ,
-                        endX,
-                        endY,
-                        endZ
-                    )
-                }
-                tcount += 1
-            }
             shape?.end()
 
             modelBatch?.begin(cam);
