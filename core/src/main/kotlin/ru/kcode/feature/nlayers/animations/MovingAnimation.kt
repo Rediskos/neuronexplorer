@@ -20,7 +20,7 @@ class MovingAnimation(
     override fun start() {
         isActive = true
         currentTime = 0f
-        currentPosition = start
+        currentPosition = Vector3(start)
         modelInstance.transform.setToTranslation(currentPosition)
     }
 
@@ -34,10 +34,10 @@ class MovingAnimation(
 
         alpha = MathUtils.clamp(alpha, 0f, 1f) // Clamp the alpha between 0 and 1
 
-        currentPosition.set(start)
-            .lerp(end, Interpolation.linear.apply(alpha)) // Interpolate between the start and end positions
+        currentPosition.set(start).lerp(end, Interpolation.linear.apply(alpha));
 
         modelInstance.transform.setToTranslation(currentPosition)
+        println("$modelInstance start: $start, end: $end, current:$currentPosition")
         return true
     }
 
@@ -48,6 +48,6 @@ class MovingAnimation(
     override fun isActive(): Boolean = isActive
 
     companion object {
-        const val BASE_MOVING_DURATION = 2f
+        const val BASE_MOVING_DURATION = 20f
     }
 }

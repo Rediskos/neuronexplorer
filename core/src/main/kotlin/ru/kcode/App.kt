@@ -70,7 +70,10 @@ class App : ApplicationAdapter() {
             shape?.projectionMatrix = cam?.combined
             shape?.begin(ShapeRenderer.ShapeType.Line);
 
-
+            for (connectionIdx in 0..10) {
+                val connection = layerController?.getOneConnection(connectionIdx)
+                shape?.let { it1 -> connection?.draw(it1) }
+            }
             shape?.end()
 
             modelBatch?.begin(cam);
@@ -80,6 +83,12 @@ class App : ApplicationAdapter() {
                         modelBatch?.render(modelInstance, environment)
                     }
                 }
+                for (connectionIdx in 0..10) {
+                    val connection = layerController?.getOneConnection(connectionIdx)
+                    connection?.animate(delta = Gdx.graphics.deltaTime)
+                    modelBatch?.render(connection?.getMoverInstance())
+                }
+
             }
             modelBatch?.end();
 

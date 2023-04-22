@@ -55,8 +55,8 @@ object MLPMnistSingleLayerExample {
     @Throws(Exception::class)
     @JvmStatic fun main(args: Array<String>) {
         //number of rows and columns in the input pictures
-        val numRows = 28
-        val numColumns = 28
+        val numRows = 15
+        val numColumns = 1
         val outputNum = 10 // number of output classes
         val batchSize = 128 // batch size for each epoch
         val rngSeed = 123 // random number seed for reproducibility
@@ -75,12 +75,12 @@ object MLPMnistSingleLayerExample {
                 .list()
                 .layer(DenseLayer.Builder() //create the first, input layer with xavier initialization
                         .nIn(numRows * numColumns)
-                        .nOut(100)
+                        .nOut(20)
                         .activation(Activation.RELU)
                         .weightInit(WeightInit.XAVIER)
                         .build())
                 .layer(OutputLayer.Builder(LossFunction.NEGATIVELOGLIKELIHOOD) //create hidden layer
-                        .nIn(100)
+                        .nIn(20)
                         .nOut(outputNum)
                         .activation(Activation.SOFTMAX)
                         .weightInit(WeightInit.XAVIER)

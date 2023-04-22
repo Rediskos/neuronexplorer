@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.VertexAttributes
 import com.badlogic.gdx.graphics.g3d.Material
 import com.badlogic.gdx.graphics.g3d.Model
+import com.badlogic.gdx.graphics.g3d.ModelInstance
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -33,11 +34,14 @@ class LayersConnector(
 
 ) {
     private val mover = NSphere(startX, startY, startZ)
-    private val moverAnimation = MovingAnimation(
-        mover.toModelInstance(),
-        Vector3(startX, startY, startZ),
-        Vector3(endX, endY, endZ)
-    )
+    private val moverInstance by lazy { mover.toModelInstance() }
+    private val moverAnimation by lazy {
+        MovingAnimation(
+            moverInstance,
+            Vector3(startX, startY, startZ),
+             Vector3(endX, endY, endZ)
+        )
+    }
     private val model: Model by lazy {
         ModelBuilder().createArrow(
             /* x1 = */ startX,
@@ -56,15 +60,18 @@ class LayersConnector(
     }
 
     fun animate(delta: Float): Boolean {
+        if (!moverAnimation.isActive()) moverAnimation.start()
         return moverAnimation.step(delta)
     }
+
+    fun isAnimating(): Boolean = moverAnimation.isActive()
     fun toModelInstance(): NetworkModelInstance {
         return NetworkModelInstance(model)
     }
 
     fun draw(shapeRenderer: ShapeRenderer) {
         shapeRenderer.color = DEFAULT_COLOR;
-        Gdx.gl.glLineWidth(weight.toFloat().absoluteValue * 100)
+        Gdx.gl.glLineWidth(weight.toFloat().absoluteValue * 10)
         shapeRenderer.line(
             startX,
             startY,
@@ -74,6 +81,8 @@ class LayersConnector(
             endZ,
         )
     }
+
+    fun getMoverInstance(): ModelInstance = moverInstance
     fun dispose() {
         model.dispose()
     }
