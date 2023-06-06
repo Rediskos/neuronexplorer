@@ -7,7 +7,7 @@ import ru.kcode.feature.nlayers.models.LayersConnector
 import ru.kcode.utils.NetworkModelInstance
 
 class DenseConnection(private val startLayer: DimLayer, private val endLayer: DimLayer, layer: Layer): DimConnection() {
-    override val models: List<LayersConnector> by lazy {
+    override val connector: List<LayersConnector> by lazy {
         val models = arrayListOf<LayersConnector>()
         val weights = layer.getParam("W")
         val numInputs = weights.shape().first();// get the number of input features
@@ -15,7 +15,6 @@ class DenseConnection(private val startLayer: DimLayer, private val endLayer: Di
 
 
         for (i in 0 until numInputs) {
-            println("Weights for input feature $i:")
             for (j in 0 until numOutputs) {
                 val weight = weights.getDouble(i, j) // get the weight for input i and output j
                 val startModel = startLayer.models[i.toInt()]
@@ -23,6 +22,8 @@ class DenseConnection(private val startLayer: DimLayer, private val endLayer: Di
                 val connection = LayersConnector(
                     startModel.x, startModel.y, startModel.z,
                     endModel.x, endModel.y, endModel.z,
+                    inputInd = i,
+                    outputInd = j,
                     weight
                 )
                 models.add(connection)
@@ -30,8 +31,9 @@ class DenseConnection(private val startLayer: DimLayer, private val endLayer: Di
         }
         models
     }
+
     private val modelInstance: List<NetworkModelInstance> by lazy {
-        models.map {
+        connector.map {
             it.toModelInstance()
         }
     }

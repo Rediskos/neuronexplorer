@@ -31,6 +31,8 @@ class OneDimLayer(
         depth = NSphere.DEFAULT_WIDTH
     }
 
+    override val holdedSignals: MutableList<Double> = MutableList(count.toInt()) { 0.0 }
+
     override val models: List<NSphere> by lazy {
         val models = ArrayList<NSphere>()
         val x = centerX

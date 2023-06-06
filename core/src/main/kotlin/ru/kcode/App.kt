@@ -80,12 +80,17 @@ class App : ApplicationAdapter() {
                         modelBatch?.render(modelInstance, environment)
                     }
                 }
+//
+//
+//                layerController.getConnections().flatten().forEach { connection ->
+//                    connection.animate(delta = Gdx.graphics.deltaTime)
+//                    modelBatch?.render(connection.getMoverInstance())
+//                }
 
-                layerController.getConnections().flatten().forEach { connection ->
-                    connection.animate(delta = Gdx.graphics.deltaTime)
-                    modelBatch?.render(connection.getMoverInstance())
-                }
-
+            }
+            layerController.processAnimationStage(Gdx.graphics.deltaTime)
+            layerController.getConnectionsForAnimation().forEach {
+                modelBatch?.render(it)
             }
             modelBatch?.end();
 

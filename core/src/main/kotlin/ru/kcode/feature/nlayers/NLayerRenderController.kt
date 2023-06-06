@@ -2,6 +2,7 @@ package ru.kcode.feature.nlayers
 
 import org.deeplearning4j.nn.api.Layer
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork
+import ru.kcode.animations.AnimationController
 import ru.kcode.feature.nlayers.connections.DenseConnection
 import ru.kcode.feature.nlayers.dimentions.OneDimLayer
 import ru.kcode.feature.nlayers.models.LayersConnector
@@ -62,11 +63,21 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
             it.getModelInstances()
         }
     }
+
+    val animationController: AnimationController by lazy {
+        AnimationController(
+            numberOfLayers = layers.size,
+            connections = connectios
+        )
+    }
     fun getLayersInstances(): List<List<NetworkModelInstance>> = layerInstances
     fun getConnectionsInstances(): List<List<NetworkModelInstance>> = connectionInstances
 
-    fun getConnections(): List<List<LayersConnector>> = connectios.map { it.models }
-    fun getOneConnection(idx: Int): LayersConnector = connectios.map { it.models }.flatten()[idx]
+    fun getConnections(): List<List<LayersConnector>> = connectios.map { it.connector }
+    fun getOneConnection(idx: Int): LayersConnector = connectios.map { it.connector }.flatten()[idx]
+
+    fun processAnimationStage(delta: Float) = animationController.animateStage(delta)
+    fun getConnectionsForAnimation() = animationController.getCurrentConnections()
     private fun analyzeLayer(layer: Layer): DimLayer? {
 
         return when (layer.javaClass.simpleName) {

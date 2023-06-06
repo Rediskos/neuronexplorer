@@ -1,4 +1,4 @@
-package ru.kcode.feature.nlayers.animations
+package ru.kcode.animations
 
 interface Animation {
     fun start()

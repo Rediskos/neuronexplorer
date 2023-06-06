@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector3
-import ru.kcode.feature.nlayers.animations.MovingAnimation
+import ru.kcode.animations.MovingAnimation
 import ru.kcode.utils.NetworkModelInstance
 import kotlin.math.absoluteValue
 
@@ -24,6 +24,8 @@ class LayersConnector(
     val endX: Float,
     val endY: Float,
     val endZ: Float,
+    val inputInd: Long,
+    val outputInd: Long,
     val weight: Double,
     private val capLength: Float = DEFAULT_CAP_LENGTH,
     private val stemThickness: Float = DEFAULT_STEM_THICKNESS,
@@ -48,6 +50,10 @@ class LayersConnector(
         depth = weight.toFloat().absoluteValue * 4,
         material = NSphere.getMaterial(weightColor)
     )
+
+    private var inputSignal: Double? = null
+    private var outputSignal: Double? = null
+
     private val moverInstance by lazy { mover.toModelInstance() }
     private val moverAnimation by lazy {
         MovingAnimation(
@@ -56,6 +62,10 @@ class LayersConnector(
             Vector3(endX, endY, endZ)
         )
     }
+
+    private var moverForSignal: ModelInstance? = null
+    private var moverForSignalAnimation: MovingAnimation? = null
+
     private val model: Model by lazy {
         ModelBuilder().createArrow(
             /* x1 = */ startX,
@@ -74,11 +84,11 @@ class LayersConnector(
     }
 
     fun animate(delta: Float): Boolean {
-        if (!moverAnimation.isActive()) moverAnimation.start()
-        return moverAnimation.step(delta)
+        if (moverForSignalAnimation?.isActive() == false) moverForSignalAnimation?.start()
+        return moverForSignalAnimation?.step(delta) ?: false
     }
 
-    fun isAnimating(): Boolean = moverAnimation.isActive()
+    fun isAnimating(): Boolean = moverForSignalAnimation?.isActive() ?: false
     fun toModelInstance(): NetworkModelInstance {
         return NetworkModelInstance(model)
     }
@@ -98,8 +108,23 @@ class LayersConnector(
         shapeRenderer.end()
     }
 
+    fun newInputSignal(signal: Double) {
+        inputSignal = signal
+        outputSignal = signal * weight
+        moverForSignal = moverInstance.copy()
+        signal.toFloat().let {
+            moverForSignal?.transform?.scale(it, it, it)
+        }
+        moverForSignalAnimation = MovingAnimation(
+            moverForSignal ?: moverInstance,
+            Vector3(startX, startY, startZ),
+            Vector3(endX, endY, endZ)
+        )
+    }
 
-    fun getMoverInstance(): ModelInstance = moverInstance
+    fun getSignalStrength() = outputSignal
+
+    fun getMoverInstance(): ModelInstance = moverForSignal ?: moverInstance
     fun dispose() {
         model.dispose()
     }

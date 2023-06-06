@@ -1,4 +1,4 @@
-package ru.kcode.feature.nlayers.animations
+package ru.kcode.animations
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance
 import com.badlogic.gdx.math.Interpolation
