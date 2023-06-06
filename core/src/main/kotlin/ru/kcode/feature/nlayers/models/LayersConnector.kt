@@ -10,10 +10,10 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector3
 import ru.kcode.feature.nlayers.animations.MovingAnimation
 import ru.kcode.utils.NetworkModelInstance
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction
 import kotlin.math.absoluteValue
 
 
@@ -33,13 +33,27 @@ class LayersConnector(
     private val attributes: Long = DEFAULT_ATTRIBUTES
 
 ) {
-    private val mover = NSphere(startX, startY, startZ)
+    private val weightColor: Color = Color(
+        MathUtils.clamp(-weight.toFloat(), 0f, 1f),
+        MathUtils.clamp(weight.toFloat(), 0f, 1f),
+        0f,
+        1f
+    )
+    private val mover = NSphere(
+        startX,
+        startY,
+        startZ,
+        height = weight.toFloat().absoluteValue * 4,
+        width = weight.toFloat().absoluteValue * 4,
+        depth = weight.toFloat().absoluteValue * 4,
+        material = NSphere.getMaterial(weightColor)
+    )
     private val moverInstance by lazy { mover.toModelInstance() }
     private val moverAnimation by lazy {
         MovingAnimation(
             moverInstance,
             Vector3(startX, startY, startZ),
-             Vector3(endX, endY, endZ)
+            Vector3(endX, endY, endZ)
         )
     }
     private val model: Model by lazy {
@@ -70,7 +84,8 @@ class LayersConnector(
     }
 
     fun draw(shapeRenderer: ShapeRenderer) {
-        shapeRenderer.color = DEFAULT_COLOR;
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.color = weightColor
         Gdx.gl.glLineWidth(weight.toFloat().absoluteValue * 10)
         shapeRenderer.line(
             startX,
@@ -80,7 +95,9 @@ class LayersConnector(
             endY,
             endZ,
         )
+        shapeRenderer.end()
     }
+
 
     fun getMoverInstance(): ModelInstance = moverInstance
     fun dispose() {

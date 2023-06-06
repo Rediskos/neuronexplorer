@@ -38,7 +38,7 @@ class OneDimLayer(
         val z = centerZ
         for (i in 1..count) {
             val sphere = NSphere(x = x, y = y, z = z)
-            y += NSphere.DEFAULT_HEIGHT * heightCoeff
+            y += NSphere.DEFAULT_HEIGHT * heightCoeff * 2f
             models.add(sphere)
         }
         models

@@ -65,28 +65,25 @@ class App : ApplicationAdapter() {
         camController?.update()
         Gdx.gl.glViewport(0, 0, Gdx.graphics.width, Gdx.graphics.height)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT.or(GL20.GL_DEPTH_BUFFER_BIT))
-        layerController?.let {
+        layerController?.let { layerController->
 
             shape?.projectionMatrix = cam?.combined
-            shape?.begin(ShapeRenderer.ShapeType.Line);
 
-            for (connectionIdx in 0..10) {
-                val connection = layerController?.getOneConnection(connectionIdx)
-                shape?.let { it1 -> connection?.draw(it1) }
+            layerController.getConnections().flatten().forEach {
+                shape?.let { shape -> it.draw(shape) }
             }
-            shape?.end()
 
             modelBatch?.begin(cam);
-            it.getLayersInstances().forEach { modelInstances ->
+            layerController.getLayersInstances().forEach { modelInstances ->
                 modelInstances.forEach { modelInstance ->
                     if (isVisible(cam, modelInstance)) {
                         modelBatch?.render(modelInstance, environment)
                     }
                 }
-                for (connectionIdx in 0..10) {
-                    val connection = layerController?.getOneConnection(connectionIdx)
-                    connection?.animate(delta = Gdx.graphics.deltaTime)
-                    modelBatch?.render(connection?.getMoverInstance())
+
+                layerController.getConnections().flatten().forEach { connection ->
+                    connection.animate(delta = Gdx.graphics.deltaTime)
+                    modelBatch?.render(connection.getMoverInstance())
                 }
 
             }

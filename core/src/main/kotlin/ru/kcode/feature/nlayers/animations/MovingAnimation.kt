@@ -37,7 +37,6 @@ class MovingAnimation(
         currentPosition.set(start).lerp(end, Interpolation.linear.apply(alpha));
 
         modelInstance.transform.setToTranslation(currentPosition)
-        println("$modelInstance start: $start, end: $end, current:$currentPosition")
         return true
     }
 

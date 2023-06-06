@@ -33,6 +33,7 @@ data class NSphere(
         model.dispose()
     }
     companion object {
+        fun getMaterial(color: Color): Material = Material(ColorAttribute.createDiffuse(color))
         const val DEFAULT_WIDTH = 1f
         const val DEFAULT_HEIGHT = 1f
         const val DEFAULT_DEPTH = 1f
