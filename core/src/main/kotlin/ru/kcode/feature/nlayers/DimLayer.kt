@@ -8,7 +8,7 @@ import ru.kcode.utils.NetworkModelInstance
 abstract class DimLayer(val size: Int = DEFAULT_NODE_SIZE, val detailLayer: Layer) {
 
     abstract val models: List<NSphere>
-    abstract val holdedSignals: List<Double>
+    abstract val holdedSignals: MutableList<Double>
 
     abstract fun getModelInstances(): List<NetworkModelInstance>
     abstract fun getWidth(): Float

@@ -113,7 +113,7 @@ class LayersConnector(
         outputSignal = signal * weight
         moverForSignal = moverInstance.copy()
         signal.toFloat().let {
-            moverForSignal?.transform?.scale(it, it, it)
+            moverForSignal?.transform?.setToScaling(it, it, it)
         }
         moverForSignalAnimation = MovingAnimation(
             moverForSignal ?: moverInstance,

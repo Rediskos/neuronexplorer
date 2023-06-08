@@ -47,6 +47,6 @@ class MovingAnimation(
     override fun isActive(): Boolean = isActive
 
     companion object {
-        const val BASE_MOVING_DURATION = 20f
+        const val BASE_MOVING_DURATION = 5f
     }
 }

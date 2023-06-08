@@ -8,6 +8,7 @@ import ru.kcode.feature.nlayers.dimentions.OneDimLayer
 import ru.kcode.feature.nlayers.models.LayersConnector
 import ru.kcode.feature.nlayers.models.NSphere
 import ru.kcode.utils.NetworkModelInstance
+import kotlin.random.Random
 
 private const val ONE_DIMENSIONS = 2
 private const val THREE_DIMENSIONS = 4
@@ -36,6 +37,10 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
         nextLayerCenterZ = tmpLayers.maxOfOrNull { it.getWidth() } ?: 0f
         nextLayerCenterZ /= 2
         tmpLayers
+    }
+
+    init {
+        loadFirstSignals()
     }
 
     private val connectios: List<DimConnection> by lazy {
@@ -67,7 +72,8 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
     val animationController: AnimationController by lazy {
         AnimationController(
             numberOfLayers = layers.size,
-            connections = connectios
+            connections = connectios,
+            layers = layers
         )
     }
     fun getLayersInstances(): List<List<NetworkModelInstance>> = layerInstances
@@ -76,7 +82,12 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
     fun getConnections(): List<List<LayersConnector>> = connectios.map { it.connector }
     fun getOneConnection(idx: Int): LayersConnector = connectios.map { it.connector }.flatten()[idx]
 
-    fun processAnimationStage(delta: Float) = animationController.animateStage(delta)
+    fun processAnimationStage(delta: Float) {
+        if (!animationController.animateStage(delta)) {
+            loadFirstSignals()
+            animationController.restartAnimation()
+        }
+    }
     fun getConnectionsForAnimation() = animationController.getCurrentConnections()
     private fun analyzeLayer(layer: Layer): DimLayer? {
 
@@ -116,6 +127,12 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
                 }
             }
             else -> null
+        }
+    }
+
+    fun loadFirstSignals() {
+        layers.first().holdedSignals.let {
+            it.forEachIndexed { index, _ -> it[index] = Random.nextDouble(0.0, 100.0) }
         }
     }
     fun dispose() = layers.forEach { it.dispose() }
