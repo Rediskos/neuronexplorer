@@ -41,13 +41,14 @@ class LayersConnector(
         0f,
         1f
     )
+    private val defaultHeight: Float = weight.toFloat().absoluteValue * 6
     private val mover = NSphere(
         startX,
         startY,
         startZ,
-        height = weight.toFloat().absoluteValue * 4,
-        width = weight.toFloat().absoluteValue * 4,
-        depth = weight.toFloat().absoluteValue * 4,
+        height = defaultHeight,
+        width = defaultHeight,
+        depth = defaultHeight,
         material = NSphere.getMaterial(weightColor)
     )
 
@@ -63,7 +64,7 @@ class LayersConnector(
         )
     }
 
-    private var moverForSignal: ModelInstance? = null
+    private var moverForSignal: NetworkModelInstance? = null
     private var moverForSignalAnimation: MovingAnimation? = null
 
     private val model: Model by lazy {
@@ -111,10 +112,13 @@ class LayersConnector(
     fun newInputSignal(signal: Double) {
         inputSignal = signal
         outputSignal = signal * weight
-        moverForSignal = moverInstance.copy()
-        signal.toFloat().let {
-            moverForSignal?.transform?.setToScaling(it, it, it)
-        }
+        val weightWithSignal = (signal * defaultHeight).toFloat()
+        moverForSignal = mover.copy(
+            height = weightWithSignal,
+            width = weightWithSignal,
+            depth = weightWithSignal,
+            material = NSphere.getMaterial(getColorForWeight(weightWithSignal))
+        ).toModelInstance()
         moverForSignalAnimation = MovingAnimation(
             moverForSignal ?: moverInstance,
             Vector3(startX, startY, startZ),
@@ -129,7 +133,15 @@ class LayersConnector(
         model.dispose()
     }
 
+
+
     companion object {
+        fun getColorForWeight(weight: Float) = Color(
+            MathUtils.clamp(-weight, 0f, 1f),
+            MathUtils.clamp(weight, 0f, 1f),
+            0f,
+            1f
+        )
         const val DEFAULT_CAP_LENGTH = 0f
         const val DEFAULT_STEM_THICKNESS = 0.01f
         const val DEFAULT_DIVISIONS = 2

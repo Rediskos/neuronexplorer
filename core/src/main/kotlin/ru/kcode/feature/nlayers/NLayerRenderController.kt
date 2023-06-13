@@ -79,6 +79,8 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
     fun getLayersInstances(): List<List<NetworkModelInstance>> = layerInstances
     fun getConnectionsInstances(): List<List<NetworkModelInstance>> = connectionInstances
 
+    fun getActivationInstances(): List<NetworkModelInstance>? = animationController.currentActivationInstances()
+
     fun getConnections(): List<List<LayersConnector>> = connectios.map { it.connector }
     fun getOneConnection(idx: Int): LayersConnector = connectios.map { it.connector }.flatten()[idx]
 
@@ -132,7 +134,7 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
 
     fun loadFirstSignals() {
         layers.first().holdedSignals.let {
-            it.forEachIndexed { index, _ -> it[index] = Random.nextDouble(0.0, 100.0) }
+            it.forEachIndexed { index, _ -> it[index] = Random.nextDouble(0.0, 1.0) }
         }
     }
     fun dispose() = layers.forEach { it.dispose() }

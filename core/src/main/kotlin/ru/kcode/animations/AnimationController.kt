@@ -3,6 +3,7 @@ package ru.kcode.animations
 import ru.kcode.animations.steps.LayerAnimationStep
 import ru.kcode.feature.nlayers.DimConnection
 import ru.kcode.feature.nlayers.DimLayer
+import ru.kcode.utils.NetworkModelInstance
 
 class AnimationController(
     private val numberOfLayers: Int,
@@ -13,6 +14,7 @@ class AnimationController(
     private var currentStage = 0
     private var stageType: LayerAnimationStep = LayerAnimationStep.PREPARING_FOR_DATA_MOVING
     private var currentConnections: DimConnection = currentConnections()
+    private var currentActivationInstances: List<NetworkModelInstance>? = null
     private lateinit var currentLayer: DimLayer
     private lateinit var nextLayer: DimLayer
 
@@ -33,12 +35,10 @@ class AnimationController(
                 }
             }
             LayerAnimationStep.PREPARING_FOR_NEURON_ACTIVATION -> {
-                stageType = LayerAnimationStep.NEURON_ACTIVATION
                 prepairingForNeuronActivation()
             }
             LayerAnimationStep.NEURON_ACTIVATION -> {
-                stageType = LayerAnimationStep.PREPARING_FOR_DATA_MOVING
-                currentStage += 1
+                neuronActivation()
             }
             LayerAnimationStep.BACK_PROPAGATION_MOVING -> TODO()
             LayerAnimationStep.ENDED -> {
@@ -47,6 +47,13 @@ class AnimationController(
             }
         }
         return true
+    }
+
+    private fun neuronActivation() {
+        nextLayer.activateNeurons()
+        currentActivationInstances = nextLayer().getActionInstances()
+        stageType = LayerAnimationStep.PREPARING_FOR_DATA_MOVING
+        currentStage += 1
     }
 
     fun restartAnimation() {
@@ -76,11 +83,14 @@ class AnimationController(
 
     private fun prepairingForNeuronActivation() {
         nextLayer = nextLayer()
+        nextLayer.forgetSignals()
         currentConnections.connector.forEach {
             nextLayer.holdedSignals[it.outputInd.toInt()] += it.getSignalStrength() ?: 0.0
         }
+        stageType = LayerAnimationStep.NEURON_ACTIVATION
     }
     private fun currentConnections() = connections[currentStage]
+    fun currentActivationInstances() = currentActivationInstances
     private fun currentLayer() = layers[currentStage]
     private fun nextLayer() = layers[currentStage + 1]
 

@@ -92,6 +92,9 @@ class App : ApplicationAdapter() {
             layerController.getConnectionsForAnimation().forEach {
                 modelBatch?.render(it)
             }
+            layerController.getActivationInstances()?.forEach {
+                modelBatch?.render(it)
+            }
             modelBatch?.end();
 
         }
