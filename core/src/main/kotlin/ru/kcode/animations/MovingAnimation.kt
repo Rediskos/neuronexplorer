@@ -40,6 +40,22 @@ class MovingAnimation(
         return true
     }
 
+    override fun reverse(delta: Float): Boolean {
+        currentTime += delta
+        if (currentTime > duration || !isActive) {
+            end()
+            return false
+        }
+        var alpha: Float = currentTime / duration  // Calculate the interpolation alpha
+
+        alpha = MathUtils.clamp(alpha, 0f, 1f) // Clamp the alpha between 0 and 1
+
+        currentPosition.set(end).lerp(start, Interpolation.linear.apply(alpha));
+
+        modelInstance.transform.setToTranslation(currentPosition)
+        return true
+    }
+
     override fun end() {
         isActive = false
     }

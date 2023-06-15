@@ -1,6 +1,8 @@
 package ru.kcode.feature.nlayers.dimentions
 
+import com.badlogic.gdx.graphics.Color
 import org.deeplearning4j.nn.api.Layer
+import org.nd4j.linalg.api.ndarray.INDArray
 import ru.kcode.feature.nlayers.DimLayer
 import ru.kcode.feature.nlayers.models.NSphere
 import ru.kcode.feature.nlayers.models.NSquare
@@ -14,6 +16,7 @@ class OneDimLayer(
     private var centerX: Float,
     private var centerY: Float,
     private val centerZ: Float,
+    override var isOutput: Boolean = false
 ) : DimLayer(detailLayer = detailLayer) {
 
     private var width: Float = 0.0f
@@ -33,6 +36,7 @@ class OneDimLayer(
     }
 
     override val holdedSignals: MutableList<Double> = MutableList(count.toInt()) { 0.0 }
+    override val backProbInfluence: MutableList<Double> = MutableList(count.toInt()) { 0.0 }
 
     override val models: List<NSphere> by lazy {
         val models = ArrayList<NSphere>()
@@ -53,6 +57,19 @@ class OneDimLayer(
         val z = centerZ
         for (i in 1..count) {
             val square = NSquare(x = x, y = y, z = z)
+            y += NSphere.DEFAULT_HEIGHT * heightCoeff * 2f
+            models.add(square)
+        }
+        models
+    }
+
+    override val backprobModels: MutableList<NSquare> by lazy {
+        val models = ArrayList<NSquare>()
+        val x = centerX
+        var y = centerY - height / 2
+        val z = centerZ
+        for (i in 1..count) {
+            val square = NSquare(x = x, y = y, z = z, material = NSphere.getMaterial(Color.BLUE))
             y += NSphere.DEFAULT_HEIGHT * heightCoeff * 2f
             models.add(square)
         }

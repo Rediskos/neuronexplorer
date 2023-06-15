@@ -70,10 +70,15 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
     }
 
     val animationController: AnimationController by lazy {
+        val target = DoubleArray(layers.last().detailLayer.getParam("W").shape().last().toInt())
+        target.forEachIndexed { i, _ ->
+            target[i] = Random.nextDouble(0.0, 1.0)
+        }
         AnimationController(
             numberOfLayers = layers.size,
             connections = connectios,
-            layers = layers
+            layers = layers,
+            target = target,
         )
     }
     fun getLayersInstances(): List<List<NetworkModelInstance>> = layerInstances
@@ -95,7 +100,6 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
 
         return when (layer.javaClass.simpleName) {
             "DenseLayer" -> {
-                print("kekw")
                 val dims = layer.getParam("W").shape().run {
                     if (isFirstLayer) first() else last()
                 }
@@ -112,7 +116,6 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
                 }
             }
             "OutputLayer" -> {
-                print("lelw")
                 val dims = layer.getParam("W").shape().run {
                     if (isFirstLayer) first() else last()
                 }
@@ -123,7 +126,8 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
                     layer,
                     centerX = nextLayerCenterX,
                     centerY = nextLayerCenterY,
-                    centerZ = nextLayerCenterZ
+                    centerZ = nextLayerCenterZ,
+                    isOutput = true
                 ).also {
                     nextLayerCenterX += NEXT_LAYER_X_SHIFT
                 }

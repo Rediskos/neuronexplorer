@@ -67,6 +67,9 @@ class LayersConnector(
     private var moverForSignal: NetworkModelInstance? = null
     private var moverForSignalAnimation: MovingAnimation? = null
 
+    private var moverBackPropagation: NetworkModelInstance? = null
+    private var moverBackPropagationAnimation: MovingAnimation? = null
+
     private val model: Model by lazy {
         ModelBuilder().createArrow(
             /* x1 = */ startX,
@@ -87,6 +90,11 @@ class LayersConnector(
     fun animate(delta: Float): Boolean {
         if (moverForSignalAnimation?.isActive() == false) moverForSignalAnimation?.start()
         return moverForSignalAnimation?.step(delta) ?: false
+    }
+
+    fun animateReverse(delta: Float): Boolean {
+        if (moverBackPropagationAnimation?.isActive() == false) moverBackPropagationAnimation?.start()
+        return moverBackPropagationAnimation?.reverse(delta) ?: false
     }
 
     fun isAnimating(): Boolean = moverForSignalAnimation?.isActive() ?: false
@@ -126,6 +134,21 @@ class LayersConnector(
         )
     }
 
+    fun newBackPropagationSignal(signal: Double) {
+        val backSignal = signal.toFloat()
+        moverBackPropagation = mover.copy(
+            height = backSignal,
+            width = backSignal,
+            depth = backSignal,
+            material = NSphere.getMaterial(getColorForWeight(backSignal))
+        ).toModelInstance()
+        moverForSignalAnimation = MovingAnimation(
+            moverForSignal ?: moverInstance,
+            Vector3(startX, startY, startZ),
+            Vector3(endX, endY, endZ)
+        )
+    }
+
     fun getSignalStrength() = outputSignal
 
     fun getMoverInstance(): ModelInstance = moverForSignal ?: moverInstance
@@ -142,6 +165,8 @@ class LayersConnector(
             0f,
             1f
         )
+
+        fun getBlueColor() = Color(Color.BLUE)
         const val DEFAULT_CAP_LENGTH = 0f
         const val DEFAULT_STEM_THICKNESS = 0.01f
         const val DEFAULT_DIVISIONS = 2
