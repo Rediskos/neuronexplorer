@@ -76,6 +76,19 @@ class OneDimLayer(
         models
     }
 
+    override val weightModels: List<NSquare> by lazy {
+        val models = ArrayList<NSquare>()
+        val x = centerX
+        var y = centerY - height / 2
+        val z = centerZ
+        for (i in 1..count) {
+            val square = NSquare(x = x, y = y, z = z, material = NSphere.getMaterial(Color.BLUE))
+            y += NSphere.DEFAULT_HEIGHT * heightCoeff * 2f
+            models.add(square)
+        }
+        models
+    }
+
     override fun getModelInstances(): List<NetworkModelInstance> = models.map {
         it.toModelInstance()
     }

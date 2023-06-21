@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector3
 import ru.kcode.animations.MovingAnimation
 import ru.kcode.utils.NetworkModelInstance
+import kotlin.math.abs
 import kotlin.math.absoluteValue
 
 
@@ -94,10 +95,11 @@ class LayersConnector(
 
     fun animateReverse(delta: Float): Boolean {
         if (moverBackPropagationAnimation?.isActive() == false) moverBackPropagationAnimation?.start()
-        return moverBackPropagationAnimation?.reverse(delta) ?: false
+        return moverBackPropagationAnimation?.step(delta) ?: false
     }
 
     fun isAnimating(): Boolean = moverForSignalAnimation?.isActive() ?: false
+    fun isAnimatingReverse(): Boolean = moverBackPropagationAnimation?.isActive() ?: false
     fun toModelInstance(): NetworkModelInstance {
         return NetworkModelInstance(model)
     }
@@ -135,23 +137,24 @@ class LayersConnector(
     }
 
     fun newBackPropagationSignal(signal: Double) {
-        val backSignal = signal.toFloat()
+        val backSignal = signal.toFloat() * defaultHeight
         moverBackPropagation = mover.copy(
-            height = backSignal,
-            width = backSignal,
-            depth = backSignal,
-            material = NSphere.getMaterial(getColorForWeight(backSignal))
+            height = abs(backSignal),
+            width = abs(backSignal),
+            depth = abs(backSignal),
+            material = NSphere.getMaterial(Color.BLUE)
         ).toModelInstance()
-        moverForSignalAnimation = MovingAnimation(
-            moverForSignal ?: moverInstance,
+        moverBackPropagationAnimation = MovingAnimation(
+            moverBackPropagation ?: moverInstance,
+            Vector3(endX, endY, endZ),
             Vector3(startX, startY, startZ),
-            Vector3(endX, endY, endZ)
         )
     }
 
     fun getSignalStrength() = outputSignal
 
     fun getMoverInstance(): ModelInstance = moverForSignal ?: moverInstance
+    fun getMoverBackProbInstance(): ModelInstance = moverBackPropagation ?: moverInstance
     fun dispose() {
         model.dispose()
     }

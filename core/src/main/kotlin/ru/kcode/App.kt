@@ -13,11 +13,8 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector3
-import kotlinx.coroutines.runBlocking
 import ru.kcode.feature.nlayers.NLayerRenderController
-import ru.kcode.feature.nlayers.models.LayersConnector
 import ru.kcode.utils.NetworkModelInstance
-import kotlin.math.absoluteValue
 
 
 class App : ApplicationAdapter() {
@@ -89,14 +86,21 @@ class App : ApplicationAdapter() {
 
             }
             layerController.processAnimationStage(Gdx.graphics.deltaTime)
-            layerController.getConnectionsForAnimation().forEach {
+            layerController.getConnectionsForAnimation()?.forEach {
+                modelBatch?.render(it)
+            }
+
+            layerController.getConnectionsForBackProb()?.forEach {
                 modelBatch?.render(it)
             }
             layerController.getActivationInstances()?.forEach {
                 modelBatch?.render(it)
             }
-            modelBatch?.end();
 
+            layerController.getBackProbActivationInstances()?.forEach {
+                modelBatch?.render(it)
+            }
+            modelBatch?.end();
         }
 
     }

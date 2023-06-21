@@ -1,5 +1,6 @@
 package ru.kcode.animations
 
+import com.badlogic.gdx.graphics.g3d.ModelInstance
 import ru.kcode.animations.steps.LayerAnimationStep
 import ru.kcode.feature.nlayers.DimConnection
 import ru.kcode.feature.nlayers.DimLayer
@@ -15,8 +16,10 @@ class AnimationController(
     private var currentStage = 0
     private var stageType: LayerAnimationStep = LayerAnimationStep.PREPARING_FOR_DATA_MOVING
     private var currentConnections: DimConnection = currentConnections()
+    private var currentConnectionInstances: List<ModelInstance>? = null
     private var currentActivationInstances: List<NetworkModelInstance>? = null
     private var currentBackpropInstances: List<NetworkModelInstance>? = null
+    private var currentBackpropMoverInstances: List<ModelInstance>? = null
     private lateinit var currentLayer: DimLayer
     private lateinit var nextLayer: DimLayer
     private var backPropagationState = false
@@ -30,6 +33,7 @@ class AnimationController(
             backPropagationState = true
             stageType = LayerAnimationStep.PREPARING_FOR_BACKPROPAGATION
             prevDeltas = target
+            currentConnectionInstances = null
         }
 
         if (currentStage < 1 && stageType == LayerAnimationStep.PREPARING_FOR_BACKPROPAGATION) {
@@ -61,6 +65,8 @@ class AnimationController(
             }
             LayerAnimationStep.ENDED -> {
                 currentStage = 0
+                currentBackpropMoverInstances = null
+                currentBackpropInstances = null
                 stageType = LayerAnimationStep.PREPARING_FOR_DATA_MOVING
                 backPropagationState = false
             }
@@ -79,7 +85,7 @@ class AnimationController(
     private fun backPropagationMoving(delta: Float): Boolean {
         var stillActive = false
         currentConnections.connector.forEach {
-            if (it.isAnimating()) {
+            if (it.isAnimatingReverse()) {
                 stillActive = true
                 it.animateReverse(delta)
             }
@@ -88,12 +94,14 @@ class AnimationController(
     }
 
     private fun preparingForBackPropagation(delta: Float) {
+        currentLayer = currentLayer()
+        currentLayer.calculateLoss(prevDeltas, currentConnections(if (currentLayer.isOutput) -1 else 0))
         currentConnections = currentConnections(-1)
-        currentLayer.calculateLoss(prevDeltas, currentConnections)
         currentConnections.connector.forEach {
             it.newBackPropagationSignal(currentLayer.backProbDeltas[it.outputInd.toInt()])
             it.animateReverse(delta)
         }
+        currentBackpropMoverInstances =  currentConnections.connector.map { it.getMoverBackProbInstance() }
         stageType = LayerAnimationStep.BACK_PROPAGATION_MOVING
     }
 
@@ -120,12 +128,13 @@ class AnimationController(
     }
 
     private fun preparingForDataMoving(delta: Float) {
-        currentConnections = currentConnections()
         currentLayer = currentLayer()
+        if(!currentLayer.isOutput) currentConnections = currentConnections()
         currentConnections.connector.forEach {
             it.newInputSignal(currentLayer.holdedSignals[it.inputInd.toInt()])
             it.animate(delta)
         }
+        currentConnectionInstances = currentConnections.connector.map { it.getMoverInstance() }
         stageType = LayerAnimationStep.DATA_MOVING
     }
 
@@ -139,9 +148,11 @@ class AnimationController(
     }
     private fun currentConnections(shift: Int = 0) = connections[currentStage + shift]
     fun currentActivationInstances() = currentActivationInstances
+    fun currentBackProbInstances() = currentBackpropInstances
     private fun currentLayer() = layers[currentStage]
     private fun nextLayer() = layers[currentStage + 1]
     private fun prevLayer() = layers[currentStage - 1]
 
-    fun getCurrentConnections() = currentConnections.connector.map { it.getMoverInstance() }
+    fun getCurrentConnections() = currentConnectionInstances
+    fun getCurrentConnectionsBackProb() = currentBackpropMoverInstances
 }

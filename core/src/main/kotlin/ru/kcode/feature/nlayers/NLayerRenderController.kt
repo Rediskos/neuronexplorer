@@ -86,6 +86,8 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
 
     fun getActivationInstances(): List<NetworkModelInstance>? = animationController.currentActivationInstances()
 
+    fun getBackProbActivationInstances(): List<NetworkModelInstance>? = animationController.currentBackProbInstances()
+
     fun getConnections(): List<List<LayersConnector>> = connectios.map { it.connector }
     fun getOneConnection(idx: Int): LayersConnector = connectios.map { it.connector }.flatten()[idx]
 
@@ -96,6 +98,7 @@ class NLayerRenderController(private val modelLayers: MultiLayerNetwork) {
         }
     }
     fun getConnectionsForAnimation() = animationController.getCurrentConnections()
+    fun getConnectionsForBackProb() = animationController.getCurrentConnectionsBackProb()
     private fun analyzeLayer(layer: Layer): DimLayer? {
 
         return when (layer.javaClass.simpleName) {

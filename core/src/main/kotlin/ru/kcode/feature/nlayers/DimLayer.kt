@@ -19,6 +19,7 @@ abstract class DimLayer(
     abstract val models: List<NSphere>
     abstract val activationModels: MutableList<NSquare>
     abstract val backprobModels: MutableList<NSquare>
+    abstract val weightModels: List<NSquare>
     abstract val holdedSignals: MutableList<Double>
     abstract val backProbInfluence: MutableList<Double>
     var backProbDeltas: DoubleArray = DoubleArray(
@@ -53,16 +54,22 @@ abstract class DimLayer(
             return
         }
 
-        val nextDelta = DoubleArray(detailLayer.getParam("W").shape().first().toInt())
+        val nextDelta = DoubleArray(detailLayer.getParam("W").shape().last().toInt())
+
+        backprobModels.forEachIndexed { index, nSquare ->
+            backprobModels[index] = backprobModels[index].copy(depth = 0f)
+        }
 
         connection.connector.forEach {
             val weight = it.weight
             val newDepth =
                 weight - DEFAULT_LEARNING_RATE * prev[it.outputInd.toInt()] * holdedSignals[it.inputInd.toInt()]
-            backprobModels[it.inputInd.toInt()] = backprobModels[it.inputInd.toInt()].copy(
-                depth = newDepth.toFloat()
-            )
-            nextDelta[it.outputInd.toInt()] += prev[it.inputInd.toInt()] * weight
+            backprobModels[it.inputInd.toInt()] = backprobModels[it.inputInd.toInt()].let{ oldBackProb ->
+                oldBackProb.copy(
+                    depth = oldBackProb.depth + newDepth.toFloat()
+                )
+            }
+            nextDelta[it.inputInd.toInt()] += prev[it.outputInd.toInt()] * weight
         }
 
 
@@ -78,7 +85,7 @@ abstract class DimLayer(
         models.forEach { it.dispose() }
     }
     companion object {
-        const val DEFAULT_LEARNING_RATE = 0.2f
+        const val DEFAULT_LEARNING_RATE = 0.01f
         const val DEFAULT_NODE_SIZE = 1
         const val DEFAULT_HEIGHT_SHIFT = NSphere.DEFAULT_HEIGHT * 5
         const val DEFAULT_WIDTH_SHIFT = NSphere.DEFAULT_WIDTH * 5
